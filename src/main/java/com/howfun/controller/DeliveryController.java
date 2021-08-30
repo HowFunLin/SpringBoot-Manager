@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 物流管理
+ * 订单管理：物流公司
  */
 @Controller
 public class DeliveryController {

@@ -1,6 +1,5 @@
 package com.howfun.aspect;
 
-
 import com.alibaba.fastjson.JSON;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
@@ -17,82 +16,97 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by jiangyunxiong on 2018/7/27.
+ * AOP记录方法运行时间
  */
 @Component
 @Aspect
 public class WebLogAspect {
 
+    /**
+     * 线程ID --> 方法执行时间表
+     */
     private Map<Long, Map<String, List<Long>>> threadMap = new ConcurrentHashMap<>(200);
 
     //匹配com.howfun.controller包及其子包下的所有类的所有方法
     @Pointcut("execution(* com.howfun.controller..*.*(..))")
-    public void executeService(){
-
+    public void executeService() {
+        // 声明切入点
     }
+
     /**
      * 前置通知，方法调用前被调用
-     * @param joinPoint
      */
     @Before("executeService()")
-    public void doBeforeAdvice(JoinPoint joinPoint){
+    public void doBeforeAdvice(JoinPoint joinPoint) {
         System.out.println(joinPoint.toShortString() + " 开始");
 
-
+        /*
+          切入点 --> 方法执行时间（堆栈方式存入，用于计算递归调用）
+         */
         Map<String, List<Long>> methodTimeMap = threadMap.get(Thread.currentThread().getId());
         List<Long> list;
+
         if (methodTimeMap == null) {
             methodTimeMap = new HashMap<>();
             list = new LinkedList<>();
+
             list.add(System.currentTimeMillis());
             methodTimeMap.put(joinPoint.toShortString(), list);
             threadMap.put(Thread.currentThread().getId(), methodTimeMap);
         } else {
             list = methodTimeMap.get(joinPoint.toShortString());
-            if (list == null) list = new LinkedList<>();
+
+            if (list == null)
+                list = new LinkedList<>();
+
             list.add(System.currentTimeMillis());
             methodTimeMap.put(joinPoint.toShortString(), list);
         }
-
     }
+
+    /**
+     * 后置通知，方法调用结束后执行
+     */
     @After("executeService()")
-    public void doAfterAdvice(JoinPoint joinPoint){
+    public void doAfterAdvice(JoinPoint joinPoint) {
         //获取目标方法的参数信息
         Object[] obj = joinPoint.getArgs();
-        //AOP代理类的信息
-        joinPoint.getThis();
-        //代理的目标对象
-        joinPoint.getTarget();
-        //用的最多 通知的签名
+        //通知的签名
         Signature signature = joinPoint.getSignature();
+
         //代理的是哪一个方法
         System.out.println("代理方法:" + signature.getName());
         //AOP代理类的名字
         System.out.println("AOP代理类的名字:" + signature.getDeclaringTypeName());
-        //AOP代理类的类（class）信息
-        signature.getDeclaringType();
+
         //获取RequestAttributes
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         //从获取RequestAttributes中获取HttpServletRequest的信息
         HttpServletRequest request = (HttpServletRequest) requestAttributes.resolveReference(RequestAttributes.REFERENCE_REQUEST);
-        //如果要获取Session信息的话，可以这样写：
-        //HttpSession session = (HttpSession) requestAttributes.resolveReference(RequestAttributes.REFERENCE_SESSION);
+
+        // 遍历并存储请求参数的信息
         Enumeration<String> enumeration = request.getParameterNames();
-        Map<String,String> parameterMap = new HashMap<>();
-        while (enumeration.hasMoreElements()){
+        Map<String, String> parameterMap = new HashMap<>();
+
+        while (enumeration.hasMoreElements()) {
             String parameter = enumeration.nextElement();
-            parameterMap.put(parameter,request.getParameter(parameter));
-        }
-        String str = JSON.toJSONString(parameterMap);
-        if(obj.length > 0) {
-            System.out.println("请求的参数信息为："+str);
+            parameterMap.put(parameter, request.getParameter(parameter));
         }
 
+        String str = JSON.toJSONString(parameterMap);
+
+        if (obj.length > 0)
+            System.out.println("请求的参数信息为：" + str);
+
         System.out.println(joinPoint.toShortString() + " 结束");
+
+        // 计算具体耗时（单位：ms）
         Map<String, List<Long>> methodTimeMap = threadMap.get(Thread.currentThread().getId());
         List<Long> list = methodTimeMap.get(joinPoint.toShortString());
+
         System.out.println("代理方法:" + signature.getName() + ", 耗时：" +
-                (System.currentTimeMillis() - list.get(list.size() - 1)));
+                (System.currentTimeMillis() - list.get(list.size() - 1)) + "ms");
+
         list.remove(list.size() - 1);
     }
 }

@@ -111,6 +111,7 @@
         </if>
         WHERE id = #{id, jdbcType=INTEGER}
     </update>
+
     <delete id="delete" parameterType="com.howfun.model.Item">
         DELETE FROM tb_item WHERE id = #{id, jdbcType=INTEGER}
     </delete>

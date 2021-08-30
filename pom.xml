@@ -52,17 +52,11 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
-        <!--excel-->
+        <!--Excel用于导出商品信息-->
         <dependency>
             <groupId>net.sourceforge.jexcelapi</groupId>
             <artifactId>jxl</artifactId>
             <version>2.6.12</version>
-        </dependency>
-
-        <!-- mongodb -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
 
         <dependency>

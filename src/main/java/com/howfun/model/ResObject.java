@@ -3,6 +3,11 @@ package com.howfun.model;
 import lombok.Data;
 
 import java.util.List;
+
+/**
+ * Response包装类
+ * @param <T> Response的类型
+ */
 @Data
 public class ResObject<T> {
 

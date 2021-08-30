@@ -92,7 +92,7 @@
 		                                    <tr>
 		                                    	<th width="10%">ID</th>
 		                                        <th width="20%">类别名称 </th>
-
+												<th width="30%">更新时间</th>
 		                                        <th width="30%">添加时间</th>
 		                                        <th>操作</th>
 		                                    </tr>
@@ -101,8 +101,8 @@
 	                                   		<tr th:each="ic : ${list}">
 										   		<td th:text="${ic.id}">Onions</td>
 										      	<td th:text="${ic.name}">Onions</td>
-
 										      	<td th:text="${ic.updatedStr}">Onions</td>
+												<td th:text="${ic.createdStr}">Onions</td>
 										      	<td>
 										      		<a th:href="@{'itemCategoryEdit?id='+${ic.id}}" title="修改"><i class="fa fa-edit text-navy"></i></a>
 										      		&nbsp;&nbsp;&nbsp;&nbsp;

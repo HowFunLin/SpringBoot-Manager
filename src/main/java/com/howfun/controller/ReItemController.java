@@ -31,33 +31,49 @@ public class ReItemController {
     @Autowired
     private ItemMapper itemMapper;
 
+    // 展示回收的商品列表
     @RequestMapping("/user/recoverManage_{pageCurrent}_{pageSize}_{pageCount}")
     public String itemManage(ReItem reItem, @PathVariable Integer pageCurrent,
                              @PathVariable Integer pageSize,
                              @PathVariable Integer pageCount,
                              Model model) {
-        if (pageSize == 0) pageSize = 50;
-        if (pageCurrent == 0) pageCurrent = 1;
-        int rows = reItemMapper.selectAll().size();
-        if (pageCount == 0) pageCount = rows % pageSize == 0 ? (rows / pageSize) : (rows / pageSize) + 1;
+        if (pageSize == 0)
+            pageSize = 50;
+        if (pageCurrent == 0)
+            pageCurrent = 1;
+
+        List<ReItem> reItems = reItemMapper.selectAll();
+
+        int rows = reItems.size();
+
+        if (pageCount == 0)
+            pageCount = rows % pageSize == 0 ? (rows / pageSize) : (rows / pageSize) + 1;
+
         reItem.setStart((pageCurrent - 1) * pageSize);
         reItem.setEnd(pageSize);
-        List<ReItem> reItemList = reItemMapper.selectAll();
-        for (ReItem r : reItemList) {
+
+        // 删除的日期
+        for (ReItem r : reItems)
             r.setRecoveredStr(DateUtil.getDateStr(r.getRecovered()));
-        }
-        model.addAttribute("reItemList", reItemList);
+
+        model.addAttribute("reItemList", reItems);
+
         String pageHTML = PageUtil.getPageContent("itemManage_{pageCurrent}_{pageSize}_{pageCount}?", pageCurrent, pageSize, pageCount);
+
         model.addAttribute("pageHTML", pageHTML);
         model.addAttribute("ReItem", reItem);
+
         return "item/recoverManage";
     }
 
+    // 恢复
     @ResponseBody
     @PostMapping("/user/reItemEditState")
     public ResObject<Object> reItemEditState(ReItem reItem) {
         ReItem reItem1 = reItemMapper.selectByPrimaryKey(reItem.getId());
+
         Item item = new Item();
+
         item.setId(reItem1.getId());
         item.setBarcode(reItem1.getBarcode());
         item.setCid(reItem1.getCid());
@@ -67,20 +83,23 @@ public class ReItemController {
         item.setSellPoint(reItem1.getSellPoint());
         item.setStatus(reItem1.getStatus());
         item.setTitle(reItem1.getTitle());
+        // 恢复订单，重置日期
         item.setCreated(new Date());
         item.setUpdated(new Date());
+
         itemMapper.insert(item);
         reItemMapper.deleteByPrimaryKey(reItem.getId());
-        ResObject<Object> object = new ResObject<Object>(Constant.Code01, Constant.Msg01, null, null);
-        return object;
+
+        return new ResObject<>(Constant.Code01, Constant.Msg01, null, null);
     }
 
+    // 彻底删除
     @ResponseBody
     @PostMapping("/user/deleteItemEditState")
     public ResObject<Object> deleteItemEditState(ReItem reItem) {
         reItemMapper.deleteByPrimaryKey(reItem.getId());
-        ResObject<Object> object = new ResObject<Object>(Constant.Code01, Constant.Msg01, null, null);
-        return object;
+
+        return new ResObject<>(Constant.Code01, Constant.Msg01, null, null);
     }
 
 }

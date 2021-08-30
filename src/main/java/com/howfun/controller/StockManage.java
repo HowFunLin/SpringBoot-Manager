@@ -26,33 +26,48 @@ public class StockManage {
     @Autowired
     private ItemCategoryMapper itemCategoryMapper;
 
+    // 展示库存页面
     @RequestMapping("/user/stockManage_{pageCurrent}_{pageSize}_{pageCount}")
     public String stockManage(Item item, @PathVariable Integer pageCurrent,
                               @PathVariable Integer pageSize,
                               @PathVariable Integer pageCount,
                               Model model) {
+        if (pageSize == 0)
+            pageSize = 50;
+        if (pageCurrent == 0)
+            pageCurrent = 1;
 
-        if (pageSize == 0) pageSize = 50;
-        if (pageCurrent == 0) pageCurrent = 1;
         int rows = itemMapper.count(item);
-        if (pageCount == 0) pageCount = rows % pageSize == 0 ? (rows / pageSize) : (rows / pageSize) + 1;
+
+        if (pageCount == 0)
+            pageCount = rows % pageSize == 0 ? (rows / pageSize) : (rows / pageSize) + 1;
+
         item.setStart((pageCurrent - 1) * pageSize);
         item.setEnd(pageSize);
+
         List<Item> itemList = itemMapper.listS(item);
-        for (Item i : itemList){
+
+        for (Item i : itemList)
             i.setUpdatedStr(DateUtil.getDateStr(i.getUpdated()));
-        }
+
         ItemCategory itemCategory = new ItemCategory();
+
         itemCategory.setStart(0);
         itemCategory.setEnd(Integer.MAX_VALUE);
+
         List<ItemCategory> itemCategoryList = itemCategoryMapper.list(itemCategory);
+
         Integer minNum = item.getMinNum();
         Integer maxNum = item.getMaxNum();
+
         model.addAttribute("itemCategoryList", itemCategoryList);
         model.addAttribute("itemList", itemList);
-        String pageHTML = PageUtil.getPageContent("stockManage_{pageCurrent}_{pageSize}_{pageCount}?title=" + item.getTitle() + "&cid=" + item.getCid() + "&minNum" + minNum + "&maxNum" + maxNum, pageCurrent, pageSize, pageCount);
+
+        String pageHTML = PageUtil.getPageContent("stockManage_{pageCurrent}_{pageSize}_{pageCount}?title=" + item.getTitle() + "&cid=" + item.getCid() + "&minNum=" + minNum + "&maxNum=" + maxNum, pageCurrent, pageSize, pageCount);
+
         model.addAttribute("pageHTML", pageHTML);
         model.addAttribute("item", item);
+
         return "item/stockManage";
     }
 }

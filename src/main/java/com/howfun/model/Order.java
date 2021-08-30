@@ -4,8 +4,11 @@ import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * 订单实体
+ */
 @Data
-public class Order extends BaseObject{
+public class Order extends BaseObject {
     private String orderId;
     private String itemId;
     private String payment;
@@ -33,14 +36,32 @@ public class Order extends BaseObject{
     private Date minOrderTime;
     private Date maxOrderTime;
     private Long userId;
+    /**
+     * 支付方式
+     */
     private String paymentTypeStr;
     private String buyerMessage;
     private String buyerNick;
     private String buyerRateStr;
+    /**
+     * 创建时间
+     */
     private String dateStr1;
+    /**
+     * 更新时间
+     */
     private String dateStr2;
+    /**
+     * 支付时间
+     */
     private String dateStr3;
+    /**
+     * 确认时间
+     */
     private String dateStr4;
+    /**
+     * 完成 / 结束时间
+     */
     private String dateStr5;
     private Integer buyerRate;
 }
